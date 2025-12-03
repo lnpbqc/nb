@@ -1,65 +1,116 @@
-import Image from "next/image";
+'use client';
 
-export default function Home() {
-  return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+import { useState } from 'react';
+import {useRouter} from "next/navigation";
+
+
+type Note = {
+    id: string;
+    title: string;
+    content: string;
+    updatedAt: string;
+};
+
+const initialNotes: Note[] = [
+    {
+        id: '1',
+        title: '欢迎使用 BlueNote',
+        content: '这是一个简洁、高效的笔记应用。你可以在这里记录想法、任务或任何灵感。\n\n支持 Markdown 格式（未来可扩展）。',
+        updatedAt: '2025-12-03',
+    },
+    {
+        id: '2',
+        title: '项目计划',
+        content: '- 完成 UI 设计\n- 实现本地存储\n- 添加搜索功能\n- 支持导出为 PDF',
+        updatedAt: '2025-12-02',
+    },
+];
+
+export default function HomePage() {
+    const [notes, setNotes] = useState<Note[]>(initialNotes);
+    const [activeNoteId, setActiveNoteId] = useState<string>('1');
+    const [isSidebarOpen, setIsSidebarOpen] = useState(true);
+
+    const activeNote = notes.find(note => note.id === activeNoteId) || notes[0];
+
+    const router = useRouter();
+
+    return (
+        <div className="flex h-screen bg-slate-50">
+            {/* Sidebar Toggle Button (for mobile) */}
+            <button
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="md:hidden fixed top-4 left-4 z-10 p-2 rounded-lg bg-blue-500 text-white"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+                ☰
+            </button>
+
+            {/* Sidebar */}
+            <aside
+                className={`bg-white border-r border-slate-200 w-64 flex-shrink-0 transform transition-transform duration-300 ease-in-out ${
+                    isSidebarOpen ? 'translate-x-0' : '-translate-x-full'
+                } md:translate-x-0 fixed md:static h-full z-10`}
             >
-              Learning
-            </a>{" "}
-            center.
-          </p>
+                <div className="p-4 border-b border-slate-200">
+                    <h1 className="text-xl font-bold text-blue-600">BlueNote</h1>
+                </div>
+                <div className="p-2 space-y-1 overflow-y-auto h-[calc(100%-60px)]">
+                    {notes.map(note => (
+                        <button
+                            key={note.id}
+                            onClick={() => {
+                                setActiveNoteId(note.id);
+                                setIsSidebarOpen(false); // Auto close on mobile
+                            }}
+                            className={`w-full text-left p-3 rounded-lg transition-colors ${
+                                activeNoteId === note.id
+                                    ? 'bg-blue-100 text-blue-700 border-l-4 border-blue-500'
+                                    : 'hover:bg-slate-100 text-slate-700'
+                            }`}
+                        >
+                            <div className="font-medium truncate">{note.title}</div>
+                            <div className="text-xs text-slate-500 mt-1">{note.updatedAt}</div>
+                        </button>
+                    ))}
+                </div>
+            </aside>
+
+            {/* Main Content */}
+            <main className="flex-1 flex flex-col overflow-hidden">
+                {/* Top Bar */}
+                <header className="bg-white border-b border-slate-200 p-4 flex items-center justify-between">
+                    <h2 className="text-lg font-semibold text-slate-800">{activeNote?.title || '无标题'}</h2>
+                    <div className="flex space-x-2">
+                        <button className="px-3 py-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md transition">
+                            保存
+                        </button>
+                        <button className="px-3 py-1.5 text-sm bg-blue-700 hover:bg-blue-600 text-white rounded-md transition"
+                            onClick={()=>router.push('/auth/signin')}
+                        >
+                            {"登录"}
+                        </button>
+                    </div>
+                </header>
+
+                {/* Note Editor / Viewer */}
+                <div className="flex-1 p-6 overflow-auto">
+          <textarea
+              value={activeNote?.content || ''}
+              readOnly
+              className="w-full h-full min-h-[400px] p-4 text-slate-700 bg-slate-50 rounded-lg border border-slate-200 focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"
+              placeholder="开始记录你的想法..."
+          />
+                    {/* 可替换为富文本编辑器如 Tiptap 或 Quill（进阶） */}
+                </div>
+            </main>
+
+            {/* Overlay for mobile sidebar */}
+            {isSidebarOpen && (
+                <div
+                    className="fixed inset-0 bg-black bg-opacity-30 z-0 md:hidden"
+                    onClick={() => setIsSidebarOpen(false)}
+                />
+            )}
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
-  );
+    );
 }
