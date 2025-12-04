@@ -51,6 +51,7 @@ export default function HomePage() {
     return (
         <div className="flex h-screen bg-slate-50">
             {/* Sidebar */}
+            {/* 只查询列表，具体内容点击后查询显示 */}
             <Aside notes={notes} setActiveNoteId={setActiveNoteId} activeNoteId={activeNoteId}  />
 
             {/* Main Content */}
@@ -59,6 +60,9 @@ export default function HomePage() {
                 <header className="bg-white border-b border-slate-200 p-4 flex items-center justify-between">
                     <h2 className="text-lg font-semibold text-slate-800">{activeNote?.title || '无标题'}</h2>
                     <div className="flex space-x-2">
+
+                        {/*如果有登录，登录有效的话，就显示登录的账号名*/}
+
                         <button className="px-3 py-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md transition">
                             保存
                         </button>
@@ -73,7 +77,6 @@ export default function HomePage() {
                 {/* Note Editor / Viewer */}
                 <div className="flex-1 p-6 overflow-auto">
                   <Tiptap  value={notes.filter((note)=>note.id===activeNoteId)[0].content}/>
-                    {/* 可替换为富文本编辑器如 Tiptap 或 Quill（进阶） */}
                 </div>
             </main>
         </div>

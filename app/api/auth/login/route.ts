@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
             maxAge: SESSION_DURATION,
             path: '/',
         });
+        // 应该存id+今天日期+hash后的password
         (await cookies()).set(TOKEN_COOKIE,await bcrypt.hash(user.passwordHash+user.id, 12), {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
