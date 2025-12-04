@@ -8,7 +8,13 @@ import Link from '@tiptap/extension-link'; // 虽然 StarterKit 包含，但常�
 import { useCallback } from 'react';
 import "./tiptap.css"
 
-const Tiptap = () => {
+interface Props {
+    value: string
+    onChange?: (content: string) => void
+}
+
+
+const Tiptap = ({ value, onChange }: Props) => {
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
@@ -33,11 +39,14 @@ const Tiptap = () => {
                 autolink: true,     // 自动将输入的 URL 转为链接
             }),
         ],
-        content: '<p>你好世界！</p>',
+        content: value,
         autofocus: true,
         editable: true,
         injectCSS: true, // 建议设为 true，否则样式可能错乱
         immediatelyRender: false,
+        onUpdate: ({editor}) => {
+            onChange?.(editor.getHTML())
+        }
     });
 
     const addImage = useCallback(() => {
@@ -55,78 +64,78 @@ const Tiptap = () => {
     }, [editor]);
 
     return (
-        <div className="border rounded-lg p-4 max-w-4xl mx-auto">
+        <div className="border border-slate-200 rounded-lg p-2 bg-white">
             {/* 工具栏 */}
             <div className="flex flex-wrap gap-2 mb-4 p-2 bg-slate-100 rounded">
                 <button
                     onClick={() => editor?.chain().focus().toggleBold().run()}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    Bold
+                    加粗
                 </button>
                 <button
                     onClick={() => editor?.chain().focus().toggleItalic().run()}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    Italic
+                    斜体
                 </button>
                 <button
                     onClick={() => editor?.chain().focus().toggleUnderline().run()}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('underline') ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    Underline
+                    下划线
                 </button>
                 <button
                     onClick={() => editor?.chain().focus().toggleStrike().run()}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('strike') ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    Strike
+                    删除线
                 </button>
                 <button
                     onClick={() => editor?.chain().focus().toggleCode().run()}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('code') ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    Code
+                    代码
                 </button>
 
                 <button
                     onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('heading', { level: 1 }) ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    H1
+                    标题一
                 </button>
                 <button
                     onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('heading', { level: 2 }) ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    H2
+                    标题二
                 </button>
 
                 <button
                     onClick={() => editor?.chain().focus().toggleBulletList().run()}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('bulletList') ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    • List
+                    无序列表
                 </button>
                 <button
                     onClick={() => editor?.chain().focus().toggleOrderedList().run()}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('orderedList') ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    1. List
+                    有序列表
                 </button>
 
                 <button
                     onClick={() => editor?.chain().focus().toggleBlockquote().run()}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('blockquote') ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    Blockquote
+                    引言块
                 </button>
 
                 <button
                     onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('codeBlock') ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    Code Block
+                    代码块
                 </button>
 
                 <button
@@ -140,7 +149,7 @@ const Tiptap = () => {
                     onClick={addLink}
                     className={`px-3 py-1 text-sm rounded ${editor?.isActive('link') ? 'bg-blue-500 text-white' : 'bg-white'}`}
                 >
-                    Link
+                    链接
                 </button>
 
                 <button
@@ -148,11 +157,11 @@ const Tiptap = () => {
                     disabled={!editor?.isActive('link')}
                     className="px-3 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
                 >
-                    Unlink
+                    撤销链接
                 </button>
 
                 <button onClick={addImage} className="px-3 py-1 text-sm bg-white rounded">
-                    Image
+                    添加图片
                 </button>
 
                 <button
@@ -166,18 +175,42 @@ const Tiptap = () => {
                     onClick={() => editor?.chain().focus().undo().run()}
                     className="px-3 py-1 text-sm bg-white rounded"
                 >
-                    Undo
+                    撤销
                 </button>
                 <button
                     onClick={() => editor?.chain().focus().redo().run()}
                     className="px-3 py-1 text-sm bg-white rounded"
                 >
-                    Redo
+                    重做
                 </button>
+                <input
+                    type="file"
+                    accept="image/*"
+                    onChange={async (e) => {
+                        const file = e.target.files?.[0];
+                        if (!file) return;
+
+                        const reader = new FileReader();
+
+                        reader.onload = () => {
+                            editor?.chain().focus().setImage({ src: reader.result as string }).run();
+                        };
+                        reader.readAsDataURL(file);
+                    }}
+                    className="hidden"
+                    id="uploadImg"
+                />
+
+                <label
+                    htmlFor="uploadImg"
+                    className="px-3 py-1 text-sm bg-white rounded"
+                >
+                    上传图片
+                </label>
             </div>
 
             {/* 编辑器内容区 */}
-            <EditorContent editor={editor} className="prose prose-blue max-w-none p-4 border rounded min-h-[300px]" />
+            <EditorContent editor={editor} className="prose max-w-none min-h-[300px]" />
         </div>
     );
 };

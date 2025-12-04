@@ -1,4 +1,4 @@
-import {integer, pgTable, varchar, text, timestamp, foreignKey} from "drizzle-orm/pg-core";
+import {integer, pgTable, varchar, text, timestamp, uuid} from "drizzle-orm/pg-core";
 
 export const usersTable = pgTable("users", {
     id: integer().primaryKey().generatedAlwaysAsIdentity(),
@@ -8,7 +8,7 @@ export const usersTable = pgTable("users", {
 });
 export const notebookTable = pgTable("notebooks",
     {
-        id: integer().primaryKey().generatedAlwaysAsIdentity(),
+        id: uuid().primaryKey(),
         title: varchar({ length: 255 }).notNull(),
         content: text().notNull(),
         authorId: integer().notNull().references(()=>usersTable.id),
