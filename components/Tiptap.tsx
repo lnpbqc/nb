@@ -6,6 +6,7 @@ import Emoji, { gitHubEmojis } from '@tiptap/extension-emoji';
 import Image from '@tiptap/extension-image';
 import Link from '@tiptap/extension-link'; // 虽然 StarterKit 包含，但常需自定义配置
 import { useCallback } from 'react';
+import "./tiptap.css"
 
 const Tiptap = () => {
     const editor = useEditor({
