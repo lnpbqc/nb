@@ -1,7 +1,15 @@
+### 项目配置drizzle
+
 ```bash
 npm i drizzle-orm pg dotenv
 npm i -D drizzle-kit tsx @types/pg
 ```
+
+需要创建.env
+```text
+DATABASE_URL="postgresql://next:next@localhost:5432/next?schema=public"
+```
+
 lib/db.ts
 ```ts
 import 'dotenv/config';
@@ -9,6 +17,7 @@ import { drizzle } from 'drizzle-orm/node-postgres';
 const db = drizzle(process.env.DATABASE_URL!);
 export default db;
 ```
+
 app/db/schema.ts
 ```ts
 import { integer, pgTable, varchar } from "drizzle-orm/pg-core";
@@ -37,7 +46,37 @@ export default defineConfig({
 });
 ```
 
+改动schema后使用这个命令应用到数据库
 ```bash
 npx drizzle-kit push
 ```
-增加了prisma文件夹 prisma.config.ts .env(设置数据库)
+
+
+### 项目配置tiptap
+
+安装
+```bash
+npm install @tiptap/react @tiptap/pm @tiptap/starter-kit
+```
+
+简单使用
+```tsx
+// Tiptap.tsx 后续在nextjs中插入即可
+'use client'
+
+import { useEditor, EditorContent } from '@tiptap/react'
+import StarterKit from '@tiptap/starter-kit'
+
+const Tiptap = () => {
+  const editor = useEditor({
+    extensions: [StarterKit],
+    content: '<p>Hello World! 🌎️</p>',
+    // Don't render immediately on the server to avoid SSR issues
+    immediatelyRender: false,
+  })
+
+  return <EditorContent editor={editor} />
+}
+
+export default Tiptap
+```

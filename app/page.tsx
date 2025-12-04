@@ -9,6 +9,7 @@ type Note = {
     title: string;
     content: string;
     updatedAt: string;
+    createdAt: string;
 };
 
 const initialNotes: Note[] = [
@@ -16,12 +17,14 @@ const initialNotes: Note[] = [
         id: '1',
         title: '欢迎使用 BlueNote',
         content: '这是一个简洁、高效的笔记应用。你可以在这里记录想法、任务或任何灵感。\n\n支持 Markdown 格式（未来可扩展）。',
+        createdAt:  "2025-12-03",
         updatedAt: '2025-12-03',
     },
     {
         id: '2',
         title: '项目计划',
         content: '- 完成 UI 设计\n- 实现本地存储\n- 添加搜索功能\n- 支持导出为 PDF',
+        createdAt:"2025-12-02",
         updatedAt: '2025-12-02',
     },
 ];
