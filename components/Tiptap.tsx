@@ -10,11 +10,12 @@ import "./tiptap.css"
 
 interface Props {
     value: string
-    onChange?: (content: string) => void
+    onChange?: (content: string) => void,
+    saveNote?: () => void,
 }
 
 
-const Tiptap = ({ value, onChange }: Props) => {
+const Tiptap = ({ value, onChange,saveNote }: Props) => {
     const editor = useEditor({
         extensions: [
             StarterKit.configure({
@@ -207,6 +208,13 @@ const Tiptap = ({ value, onChange }: Props) => {
                 >
                     上传图片
                 </label>
+
+                <button
+                    onClick={saveNote}
+                    className="px-3 py-1 text-sm bg-green-400 rounded"
+                >
+                    保存
+                </button>
             </div>
 
             {/* 编辑器内容区 */}

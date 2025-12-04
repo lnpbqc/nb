@@ -8,12 +8,30 @@ import Tiptap from "@/components/Tiptap";
 
 const getNotes = async () => {
     try {
-        const res = await fetch('/api/notes', { cache: 'no-store' });
+        const res = await fetch('/api/notes', { cache: 'no-store',method:"get"});
         if (!res.ok) return null;
         return await res.json();
     } catch (e) {
         console.error(e);
         return null;
+    }
+};
+
+const saveNote = async (note:Note) => {
+    try {
+        const res = await fetch('/api/notes', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(note),
+        });
+        const json = await res.json();
+        console.log(json);
+
+        if (!res.ok) return alert("Could not save note");
+    } catch (e) {
+        console.error(e);
     }
 };
 
@@ -32,6 +50,7 @@ export default function HomePage() {
     // id或用uuid
     const [notes, setNotes] = useState<Note[]>(initialNotes);
     const [activeNoteId, setActiveNoteId] = useState<string>(notes[0].id);
+    const [userName, setUserName] = useState<string>("");
 
     useEffect(() => {
         (async () => {
@@ -41,6 +60,8 @@ export default function HomePage() {
                 setActiveNoteId(data[0].id);
             }
         })();
+
+
     }, []);
 
     const activeNote = notes.find(note => note.id === activeNoteId) || notes[0];
@@ -63,6 +84,8 @@ export default function HomePage() {
 
                         {/*如果有登录，登录有效的话，就显示登录的账号名*/}
 
+                        <span className={"underline"}>{userName}</span>
+
                         <button className="px-3 py-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md transition">
                             保存
                         </button>
@@ -76,7 +99,16 @@ export default function HomePage() {
 
                 {/* Note Editor / Viewer */}
                 <div className="flex-1 p-6 overflow-auto">
-                  <Tiptap  value={notes.filter((note)=>note.id===activeNoteId)[0].content}/>
+                  <Tiptap  value={notes.filter((note)=>note.id===activeNoteId)[0].content}
+                           saveNote={()=>saveNote(notes.filter((note)=>note.id===activeNoteId)[0])}
+                  onChange={(content:string)=>{
+                      const note = notes.filter((note)=>note.id===activeNoteId)[0]
+                      const local_notes = notes.filter((note)=>note.id!==activeNoteId)
+                      note.content = content;
+                      note.updatedAt = Date.now().toString();
+                      local_notes.push(note);
+                      setNotes(local_notes);
+                  }}/>
                 </div>
             </main>
         </div>

@@ -40,7 +40,8 @@ export async function POST(request: NextRequest) {
             path: '/',
         });
         // 应该存id+今天日期+hash后的password
-        (await cookies()).set(TOKEN_COOKIE,await bcrypt.hash(user.passwordHash+user.id, 12), {
+        const today = new Date().toLocaleDateString("zh-CN").replace(/\//g, "-");
+        (await cookies()).set(TOKEN_COOKIE,(await bcrypt.hash(today+":"+user.passwordHash+":"+user.id, 12)).toString(), {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',
             maxAge: SESSION_DURATION,
