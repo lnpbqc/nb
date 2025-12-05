@@ -36,6 +36,7 @@ export default function TitleEditor({ value, onChange }: Props) {
                         value={draft}
                         onChange={(e) => setDraft(e.target.value)}
                         autoFocus
+                        onKeyDown={(e)=>e.key === 'Enter' && handleSave()}
                     />
                     <button
                         onClick={handleSave}

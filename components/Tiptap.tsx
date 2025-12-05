@@ -63,7 +63,7 @@ const Tiptap = ({ value, onChange,saveNote }: Props) => {
     }, [editor]);
 
     return (
-        <div className="border border-slate-200 rounded-lg p-2 bg-white">
+        <div className="border border-slate-200 rounded-lg p-2 bg-white h-full flex flex-col">
             {/* 工具栏 */}
             <div className="flex flex-wrap gap-2 mb-4 p-2 bg-slate-100 rounded">
                 <button
@@ -216,7 +216,7 @@ const Tiptap = ({ value, onChange,saveNote }: Props) => {
             </div>
 
             {/* 编辑器内容区 */}
-            <EditorContent editor={editor} className="prose max-w-none min-h-[300px]" />
+            <EditorContent editor={editor} className="prose max-w-none flex-1 h-full overflow-y-auto tiptap-editor" />
         </div>
     );
 };

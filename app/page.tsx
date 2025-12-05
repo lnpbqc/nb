@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { useRouter } from "next/navigation";
 import Aside from "@/components/Aside";
-import {Note, today} from "@/lib/definitions";
+import {Note, now} from "@/lib/definitions";
 import Tiptap from "@/components/Tiptap";
 import { getNotes, saveNote } from "@/lib/notes";
 import TitleEditor from "@/components/TitleEditor";
@@ -12,8 +12,8 @@ const createNewNote = (): Note => ({
     id: crypto.randomUUID(),
     title: "新建笔记",
     content: "",
-    createdAt: today,
-    updatedAt: today,
+    createdAt: now(),
+    updatedAt: now(),
 });
 
 
@@ -28,6 +28,10 @@ export default function HomePage() {
     // 假设用户名（未来可从 auth 获取）
     const userName = "未登录";
 
+    const sortNotes = (notes: Note[]) => {
+        notes.sort((a:Note,b:Note)=>-new Date(a.updatedAt).getTime()+new Date(b.updatedAt).getTime())
+    }
+
 
     // 页面加载时获取数据库笔记，没有笔记时使用 example
     useEffect(() => {
@@ -39,11 +43,16 @@ export default function HomePage() {
                 setNotes([first]);
                 setActiveNoteId(first.id);
             } else {
+                sortNotes(data)
                 setNotes(data);
                 setActiveNoteId(data[0].id);
             }
         })();
     }, []);
+
+    useEffect(() => {
+        sortNotes(notes);
+    }, [notes]);
 
 
     // 一个接收 Note 的保存函数：保存到数据库，然后刷新列表
@@ -51,7 +60,11 @@ export default function HomePage() {
         if (!note) return;
         await saveNote(note);           // 保存到数据库
         const newNotes = await getNotes();  // 重新获取最新数据库内容
-        if(newNotes)setNotes(newNotes);
+
+        if(newNotes){
+            sortNotes(newNotes)
+            setNotes(newNotes);
+        }
     };
 
     const createNote = async () => {
@@ -67,6 +80,7 @@ export default function HomePage() {
     return (
         <div className="flex h-screen bg-slate-50">
             <Aside
+                key={activeNote?.updatedAt}
                 notes={notes}
                 activeNoteId={activeNoteId||"0"}
                 setActiveNoteId={setActiveNoteId}
@@ -93,7 +107,7 @@ export default function HomePage() {
 
                     </TitleEditor>
 
-                    <div className="flex space-x-2">
+                    <div className="flex space-x-2 justify-center items-center">
                         <span className="underline">{userName}</span>
 
                         <button
@@ -104,7 +118,7 @@ export default function HomePage() {
                         </button>
 
                         <button
-                            className="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-md"
+                            className="px-3 py-1.5 text-sm bg-blue-600 hover:bg-blue-900 text-white rounded-md"
                             onClick={createNote}
                         >
                             新建笔记
@@ -124,14 +138,14 @@ export default function HomePage() {
                         <Tiptap
                             key={activeNote.id}
                             value={activeNote.content}
-                            saveNote={() => saveNote(activeNote)}
+                            saveNote={() => save(activeNote)}
                             onChange={(content: string) => {
                                 const updatedNotes = notes.map(n =>
                                     n.id === activeNoteId
                                         ? {
                                             ...n,
                                             content,
-                                            updatedAt: new Date().toLocaleDateString("zh-CN").replace(/\//g, "-"),
+                                            // updatedAt: new Date().toLocaleDateString("zh-CN").replace(/\//g, "-"),
                                         }
                                         : n
                                 );

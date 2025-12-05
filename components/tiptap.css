@@ -2,3 +2,17 @@
 /*.tiptap p {*/
 /*    color: red;*/
 /*}*/
+.tiptap-editor p:first-child,
+.tiptap-editor h1:first-child,
+.tiptap-editor h2:first-child,
+.tiptap-editor h3:first-child,
+.tiptap-editor h4:first-child,
+.tiptap-editor h5:first-child,
+.tiptap-editor h6:first-child,
+.tiptap-editor p{
+    margin: 0 0;
+    padding: 2px 0;
+}
+.ProseMirror{
+    height: 100%;
+}

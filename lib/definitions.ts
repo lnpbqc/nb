@@ -17,3 +17,15 @@ export type User = {
 }
 
 export const today = new Date().toLocaleDateString("zh-CN").replace(/\//g, "-");
+export const now = ()=>{
+    function toLocalSqlTimestampMs(date: Date) {
+        const pad = (n: number) => String(n).padStart(2, "0");
+        const ms = String(date.getMilliseconds()).padStart(3, "0");
+
+        return (
+            `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())} ` +
+            `${pad(date.getHours())}:${pad(date.getMinutes())}:${pad(date.getSeconds())}.${ms}`
+        );
+    }
+    return toLocalSqlTimestampMs(new Date());
+}

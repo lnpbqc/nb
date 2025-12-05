@@ -37,3 +37,25 @@ export const saveNote = async (note: Note): Promise<boolean> => {
         return false;
     }
 };
+
+export const deleteNote = async (id: string): Promise<boolean> => {
+    try {
+        console.log("===========================",id)
+        const res = await fetch('/api/notes', {
+            method: "DELETE",
+            headers: { "Content-Type": "application/json" },
+            body: id,
+        });
+
+        if (!res.ok) {
+            alert("Could not delete note");
+            return false;
+        }
+
+        const { success } = await res.json();
+        return success;
+    } catch (e) {
+        console.error("saveNote error:", e);
+        return false;
+    }
+};
