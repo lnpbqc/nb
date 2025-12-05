@@ -1,14 +1,14 @@
 import {Note} from "@/lib/definitions"
-import {deleteNote} from "@/lib/notes";
 
 type AsidePros = {
     notes: Note[],
     setActiveNoteId: (noteId: string) => void,
     activeNoteId:string,
     createNote:() => void,
+    deleteNote:(id:string) => void,
 }
 
-export default function Aside({notes, setActiveNoteId,activeNoteId,createNote}:AsidePros){
+export default function Aside({notes, setActiveNoteId,activeNoteId,deleteNote}:AsidePros){
     return (
         <aside
             className={`bg-white border-r border-slate-200 w-64 flex-shrink-0 transform transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0 fixed md:static h-screen z-10`}>
@@ -36,7 +36,7 @@ export default function Aside({notes, setActiveNoteId,activeNoteId,createNote}:A
                         <div className="font-medium truncate">{note.title}</div>
                         <div className="text-xs text-slate-500 mt-1">{note.updatedAt}</div>
                         {activeNoteId === note.id&&(<div className={"absolute right-1 top-1/2 -translate-1/2"} onClick={()=>{
-                            deleteNote(activeNoteId)
+                            deleteNote(note.id)
                         }}>X</div>)}
                     </button>
                 ))}

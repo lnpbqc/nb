@@ -1,43 +1,15 @@
 // app/api/auth/route.ts
 import { NextRequest, NextResponse } from 'next/server';
-import {cookies} from "next/headers";
-import * as bcrypt from "bcryptjs";
 import db from "@/lib/db";
-import {notebookTable, usersTable} from "@/app/db/schema";
-import {eq} from "drizzle-orm";
+import {notebookTable} from "@/app/db/schema";
+import {and, eq} from "drizzle-orm";
 import {now, today} from "@/lib/definitions"
-
-const ID_COOKIE = 'session_user_id';
-const TOKEN_COOKIE = 'session_user_token';
+import authenticate from "@/app/api/auth/auth-user";
 
 export async function POST(request: NextRequest) {
     try {
         const json = await request.json();
-        const cookieStore = await cookies();
-
-        const id = Number(cookieStore.get(ID_COOKIE)?.value);
-        const token = String(cookieStore.get(TOKEN_COOKIE)?.value);
-
-        const [user] = await db
-            .select()
-            .from(usersTable)
-            .where(eq(usersTable.id, id));
-
-        if (!user) {
-            return NextResponse.json({ error: "用户不存在" }, { status: 401 });
-        }
-
-        const isValid = await bcrypt.compare(
-            today + ":" + user.passwordHash + ":" + String(user.id),
-            token
-        );
-
-        if (!isValid) {
-            return NextResponse.json(
-                { error: "未登录，无法保存笔记" },
-                { status: 401 }
-            );
-        }
+        const user = await authenticate();
 
         const payload = {
             ...json,
@@ -73,35 +45,9 @@ export async function POST(request: NextRequest) {
     }
 }
 
-export async function GET(request: NextRequest) {
+export async function GET() {
     try {
-        const cookieStore = await cookies();
-
-        const id = Number(cookieStore.get(ID_COOKIE)?.value);
-        const token = String(cookieStore.get(TOKEN_COOKIE)?.value);
-
-        // 查用户
-        const [user] = await db
-            .select()
-            .from(usersTable)
-            .where(eq(usersTable.id, id));
-
-        if (!user) {
-            return NextResponse.json({ error: "用户不存在" }, { status: 401 });
-        }
-
-        // 校验权限
-        const isValid = await bcrypt.compare(
-            today + ":" + user.passwordHash + ":" + String(user.id),
-            token
-        );
-
-        if (!isValid) {
-            return NextResponse.json(
-                { error: "未登录，无法获取笔记" },
-                { status: 401 }
-            );
-        }
+        const user = await authenticate();
 
         // 查询该用户全部笔记
         const notes = await db
@@ -121,43 +67,40 @@ export async function GET(request: NextRequest) {
 
 export async function DELETE(request: NextRequest) {
     try {
-        const cookieStore = await cookies();
+        const json = await request.json();
+        const user = await authenticate();  // 获取登录的用户
 
-        const id = Number(cookieStore.get(ID_COOKIE)?.value);
-        const token = String(cookieStore.get(TOKEN_COOKIE)?.value);
-
-        // 查用户
-        const [user] = await db
+        // 先查询笔记是否存在且属于该用户
+        const [note] = await db
             .select()
-            .from(usersTable)
-            .where(eq(usersTable.id, id));
+            .from(notebookTable)
+            .where(
+                eq(notebookTable.id, json.id)
+            );
 
-        if (!user) {
-            return NextResponse.json({ error: "用户不存在" }, { status: 401 });
-        }
-
-        // 校验权限
-        const isValid = await bcrypt.compare(
-            today + ":" + user.passwordHash + ":" + String(user.id),
-            token
-        );
-
-        if (!isValid) {
+        if (!note) {
             return NextResponse.json(
-                { error: "未登录，无法获取笔记" },
-                { status: 401 }
+                { error: "笔记不存在" },
+                { status: 404 }
             );
         }
 
-        // 查询该用户全部笔记
-        const notes = await db
-            .select()
-            .from(notebookTable)
-            .where(eq(notebookTable.authorId, user.id));
+        if (note.authorId !== user.id) {
+            return NextResponse.json(
+                { error: "无权删除他人的笔记" },
+                { status: 403 }
+            );
+        }
 
-        return NextResponse.json({ success: true, notes });
+        // 删除笔记
+        await db
+            .delete(notebookTable)
+            .where(eq(notebookTable.id, json.id));
+
+        return NextResponse.json({ success: true });
+
     } catch (error) {
-        console.error("获取笔记失败", error);
+        console.error("删除笔记失败", error);
         return NextResponse.json(
             { error: "服务器错误", success: false },
             { status: 500 }

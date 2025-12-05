@@ -5,7 +5,7 @@ import { useRouter } from "next/navigation";
 import Aside from "@/components/Aside";
 import {Note, now} from "@/lib/definitions";
 import Tiptap from "@/components/Tiptap";
-import { getNotes, saveNote } from "@/lib/notes";
+import {deleteNote, getNotes, saveNote} from "@/lib/notes";
 import TitleEditor from "@/components/TitleEditor";
 
 const createNewNote = (): Note => ({
@@ -30,6 +30,10 @@ export default function HomePage() {
 
     const sortNotes = (notes: Note[]) => {
         notes.sort((a:Note,b:Note)=>-new Date(a.updatedAt).getTime()+new Date(b.updatedAt).getTime())
+    }
+
+    const localGetNotes = async () => {
+
     }
 
 
@@ -85,6 +89,21 @@ export default function HomePage() {
                 activeNoteId={activeNoteId||"0"}
                 setActiveNoteId={setActiveNoteId}
                 createNote={createNote}  // 💡传给 Aside，将在 Aside 中加按钮
+                deleteNote={async (id:string)=>{
+                    deleteNote(id);
+
+                    const data = await getNotes();
+                    if (!data || data.length === 0) {
+                        const first = createNewNote();
+                        await saveNote(first);
+                        setNotes([first]);
+                        setActiveNoteId(first.id);
+                    } else {
+                        sortNotes(data)
+                        setNotes(data);
+                        setActiveNoteId(data[0].id);
+                    }
+                }}
             />
 
             <main className="flex-1 flex flex-col overflow-hidden">

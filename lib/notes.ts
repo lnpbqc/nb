@@ -40,11 +40,10 @@ export const saveNote = async (note: Note): Promise<boolean> => {
 
 export const deleteNote = async (id: string): Promise<boolean> => {
     try {
-        console.log("===========================",id)
         const res = await fetch('/api/notes', {
             method: "DELETE",
             headers: { "Content-Type": "application/json" },
-            body: id,
+            body: JSON.stringify({id}),
         });
 
         if (!res.ok) {
