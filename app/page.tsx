@@ -1,114 +1,140 @@
 'use client';
 
-import {useEffect, useState} from 'react';
-import {useRouter} from "next/navigation";
+import { useEffect, useState } from 'react';
+import { useRouter } from "next/navigation";
 import Aside from "@/components/Aside";
-import {Note} from "@/lib/definitions"
+import {Note, today} from "@/lib/definitions";
 import Tiptap from "@/components/Tiptap";
+import { getNotes, saveNote } from "@/lib/notes";
 
-const getNotes = async () => {
-    try {
-        const res = await fetch('/api/notes', { cache: 'no-store',method:"get"});
-        if (!res.ok) return null;
-        return await res.json();
-    } catch (e) {
-        console.error(e);
-        return null;
-    }
-};
+const createNewNote = (): Note => ({
+    id: crypto.randomUUID(),
+    title: "新建笔记",
+    content: "",
+    createdAt: today,
+    updatedAt: today,
+});
 
-const saveNote = async (note:Note) => {
-    try {
-        const res = await fetch('/api/notes', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify(note),
-        });
-        const json = await res.json();
-        console.log(json);
 
-        if (!res.ok) return alert("Could not save note");
-    } catch (e) {
-        console.error(e);
-    }
-};
-
-const initialNotes: Note[] = [
-    {
-        id: crypto.randomUUID(),
-        title: '欢迎使用 BlueNote',
-        content: '这是一个简洁、高效的笔记应用。你可以在这里记录想法、任务或任何灵感。\n\n支持 Markdown 格式（未来可扩展）。',
-        createdAt:  "2025-12-03",
-        updatedAt: '2025-12-03',
-    },
-];
 
 export default function HomePage() {
-    // 从数据库获取和从本地获取
-    // id或用uuid
-    const [notes, setNotes] = useState<Note[]>(initialNotes);
-    const [activeNoteId, setActiveNoteId] = useState<string>(notes[0].id);
-    const [userName, setUserName] = useState<string>("");
+    const [notes, setNotes] = useState<Note[]>([]);
+    const [activeNoteId, setActiveNoteId] = useState<string | null>(null);
+    const router = useRouter();
 
+    const activeNote = notes.find(n => n.id === activeNoteId) || null;
+
+    // 假设用户名（未来可从 auth 获取）
+    const userName = "未登录";
+
+
+    // 页面加载时获取数据库笔记，没有笔记时使用 example
     useEffect(() => {
         (async () => {
             const data = await getNotes();
-            if (data) {
+            if (!data || data.length === 0) {
+                const first = createNewNote();
+                await saveNote(first);
+                setNotes([first]);
+                setActiveNoteId(first.id);
+            } else {
                 setNotes(data);
                 setActiveNoteId(data[0].id);
             }
         })();
-
-
     }, []);
 
-    const activeNote = notes.find(note => note.id === activeNoteId) || notes[0];
 
-    const router = useRouter();
+    // 一个接收 Note 的保存函数：保存到数据库，然后刷新列表
+    const save = async (note: Note | null) => {
+        if (!note) return;
+        await saveNote(note);           // 保存到数据库
+        const newNotes = await getNotes();  // 重新获取最新数据库内容
+        setNotes(newNotes);
+    };
+
+    const createNote = async () => {
+        const newNote = createNewNote();
+        await saveNote(newNote);
+
+        setNotes(prev => [newNote, ...prev]);
+        setActiveNoteId(newNote.id);
+    };
+
 
 
     return (
         <div className="flex h-screen bg-slate-50">
-            {/* Sidebar */}
-            {/* 只查询列表，具体内容点击后查询显示 */}
-            <Aside notes={notes} setActiveNoteId={setActiveNoteId} activeNoteId={activeNoteId}  />
+            <Aside
+                notes={notes}
+                activeNoteId={activeNoteId}
+                setActiveNoteId={setActiveNoteId}
+                createNote={createNote}  // 💡传给 Aside，将在 Aside 中加按钮
+            />
 
-            {/* Main Content */}
             <main className="flex-1 flex flex-col overflow-hidden">
-                {/* Top Bar */}
                 <header className="bg-white border-b border-slate-200 p-4 flex items-center justify-between">
-                    <h2 className="text-lg font-semibold text-slate-800">{activeNote?.title || '无标题'}</h2>
+
+                    <input type="text" value={activeNote?.title||"无标题"} onChange={(e) => {
+                        const newTitle = e.target.value || ""
+                        const updatedNotes = notes.map(n =>
+                            n.id === activeNoteId
+                                ? {
+                                    ...n,
+                                    title: newTitle,
+                                    updatedAt: new Date().toLocaleDateString("zh-CN").replace(/\//g, "-"),
+                                }
+                                : n
+                        );
+                        setNotes(updatedNotes);
+                    }} />
+
                     <div className="flex space-x-2">
+                        <span className="underline">{userName}</span>
 
-                        {/*如果有登录，登录有效的话，就显示登录的账号名*/}
-
-                        <span className={"underline"}>{userName}</span>
-
-                        <button className="px-3 py-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md transition">
+                        <button
+                            className="px-3 py-1.5 text-sm bg-blue-500 hover:bg-blue-600 text-white rounded-md"
+                            onClick={() => save(activeNote)}
+                        >
                             保存
                         </button>
-                        <button className="px-3 py-1.5 text-sm bg-blue-700 hover:bg-blue-600 text-white rounded-md transition"
-                            onClick={()=>router.push('/auth/signin')}
+
+                        <button
+                            className="px-3 py-1.5 text-sm bg-green-600 hover:bg-green-700 text-white rounded-md"
+                            onClick={createNote}
                         >
-                            {"登录/注册"}
+                            新建笔记
+                        </button>
+
+                        <button
+                            className="px-3 py-1.5 text-sm bg-blue-700 hover:bg-blue-600 text-white rounded-md"
+                            onClick={() => router.push('/auth/signin')}
+                        >
+                            登录/注册
                         </button>
                     </div>
                 </header>
 
-                {/* Note Editor / Viewer */}
                 <div className="flex-1 p-6 overflow-auto">
-                  <Tiptap  value={notes.filter((note)=>note.id===activeNoteId)[0].content}
-                           saveNote={()=>saveNote(notes.filter((note)=>note.id===activeNoteId)[0])}
-                  onChange={(content:string)=>{
-                      const note = notes.filter((note)=>note.id===activeNoteId)[0]
-                      const local_notes = notes.filter((note)=>note.id!==activeNoteId)
-                      note.content = content;
-                      note.updatedAt = Date.now().toString();
-                      local_notes.push(note);
-                      setNotes(local_notes);
-                  }}/>
+                    {activeNote && (
+                        <Tiptap
+                            key={activeNote.id}
+                            value={activeNote.content}
+                            saveNote={() => saveNote(activeNote)}
+                            onChange={(content: string) => {
+                                const updatedNotes = notes.map(n =>
+                                    n.id === activeNoteId
+                                        ? {
+                                            ...n,
+                                            content,
+                                            updatedAt: new Date().toLocaleDateString("zh-CN").replace(/\//g, "-"),
+                                        }
+                                        : n
+                                );
+                                setNotes(updatedNotes);
+                            }}
+                        />
+                    )}
                 </div>
             </main>
         </div>

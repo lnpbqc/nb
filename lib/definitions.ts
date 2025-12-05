@@ -15,3 +15,5 @@ export type User = {
     passwordHash: string;
     token: string;
 }
+
+export const today = new Date().toLocaleDateString("zh-CN").replace(/\//g, "-");

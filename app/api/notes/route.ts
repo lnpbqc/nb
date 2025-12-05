@@ -3,38 +3,35 @@ import { NextRequest, NextResponse } from 'next/server';
 import {cookies} from "next/headers";
 import * as bcrypt from "bcryptjs";
 import db from "@/lib/db";
-import {usersTable} from "@/app/db/schema";
+import {notebookTable, usersTable} from "@/app/db/schema";
 import {eq} from "drizzle-orm";
-import {number} from "@drizzle-team/brocli";
+import {today} from "@/lib/definitions"
 
 const ID_COOKIE = 'session_user_id';
 const TOKEN_COOKIE = 'session_user_token';
 
 export async function POST(request: NextRequest) {
     try {
-        // 读取 body
         const json = await request.json();
-        console.log(json);
-
-        // 你可以从 Cookie 中提取登录用户信息
-        const cookieStore =await cookies();
+        const cookieStore = await cookies();
 
         const id = Number(cookieStore.get(ID_COOKIE)?.value);
         const token = String(cookieStore.get(TOKEN_COOKIE)?.value);
-
 
         const [user] = await db
             .select()
             .from(usersTable)
             .where(eq(usersTable.id, id));
 
-        console.log(user)
-        console.log(token)
+        if (!user) {
+            return NextResponse.json({ error: "用户不存在" }, { status: 401 });
+        }
 
-        const today = new Date().toLocaleDateString("zh-CN").replace(/\//g, "-");
-        const isValid = await bcrypt.compare((await bcrypt.hash(today+":"+user.passwordHash+":"+user.id, 12)).toString(), token)
-        console.log(await bcrypt.hash(Date.now()+":"+user.passwordHash+":"+user.id, 12))
-        // 检查是否登录
+        const isValid = await bcrypt.compare(
+            today + ":" + user.passwordHash + ":" + String(user.id),
+            token
+        );
+
         if (!isValid) {
             return NextResponse.json(
                 { error: "未登录，无法保存笔记" },
@@ -42,25 +39,81 @@ export async function POST(request: NextRequest) {
             );
         }
 
+        const payload = {
+            ...json,
+            authorId: user.id,
+            updatedAt: today,
+        };
 
+        const [note] = await db
+            .select()
+            .from(notebookTable)
+            .where(eq(notebookTable.id, payload.id));
 
-        // 返回保存后的笔记
-        return NextResponse.json("asd", { status: 200 });
+        if (!note) {
+            await db.insert(notebookTable).values(payload);
+        } else {
+            await db
+                .update(notebookTable)
+                .set({
+                    content: payload.content,
+                    updatedAt: today,
+                })
+                .where(eq(notebookTable.id, payload.id));
+        }
+
+        return NextResponse.json({ success: true });
     } catch (error) {
         console.error("保存笔记失败", error);
         return NextResponse.json(
-            { error: "服务器错误" },
+            { error: "服务器错误", success: false },
             { status: 500 }
         );
     }
 }
 
 export async function GET(request: NextRequest) {
-    return NextResponse.json([{
-        id: crypto.randomUUID(),
-        title: '欢迎使用 BlueNote',
-        content: '这是一个简洁、高效的笔记应用。你可以在这里记录想法、任务或任何灵感。\n\n支持 Markdown 格式（未来可扩展）。',
-        createdAt:  "2025-12-03",
-        updatedAt: '2025-12-03',
-    }],{status:200})
+    try {
+        const cookieStore = await cookies();
+
+        const id = Number(cookieStore.get(ID_COOKIE)?.value);
+        const token = String(cookieStore.get(TOKEN_COOKIE)?.value);
+
+        // 查用户
+        const [user] = await db
+            .select()
+            .from(usersTable)
+            .where(eq(usersTable.id, id));
+
+        if (!user) {
+            return NextResponse.json({ error: "用户不存在" }, { status: 401 });
+        }
+
+        // 校验权限
+        const isValid = await bcrypt.compare(
+            today + ":" + user.passwordHash + ":" + String(user.id),
+            token
+        );
+
+        if (!isValid) {
+            return NextResponse.json(
+                { error: "未登录，无法获取笔记" },
+                { status: 401 }
+            );
+        }
+
+        // 查询该用户全部笔记
+        const notes = await db
+            .select()
+            .from(notebookTable)
+            .where(eq(notebookTable.authorId, user.id));
+
+        return NextResponse.json({ success: true, notes });
+    } catch (error) {
+        console.error("获取笔记失败", error);
+        return NextResponse.json(
+            { error: "服务器错误", success: false },
+            { status: 500 }
+        );
+    }
 }

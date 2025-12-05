@@ -5,6 +5,7 @@ import { usersTable } from '@/app/db/schema';
 import { eq } from 'drizzle-orm';
 import * as bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
+import {today} from "@/lib/definitions"
 
 const ID_COOKIE = 'session_user_id';
 const TOKEN_COOKIE = 'session_user_token';
@@ -39,8 +40,8 @@ export async function POST(request: NextRequest) {
             maxAge: SESSION_DURATION,
             path: '/',
         });
+
         // 应该存id+今天日期+hash后的password
-        const today = new Date().toLocaleDateString("zh-CN").replace(/\//g, "-");
         (await cookies()).set(TOKEN_COOKIE,(await bcrypt.hash(today+":"+user.passwordHash+":"+user.id, 12)).toString(), {
             httpOnly: true,
             secure: process.env.NODE_ENV === 'production',

@@ -1,12 +1,14 @@
 import {Note} from "@/lib/definitions"
+import {saveNote} from "@/lib/notes";
 
 type AsidePros = {
     notes: Note[],
     setActiveNoteId: (noteId: string) => void,
-    activeNoteId:string
+    activeNoteId:string,
+    createNote:() => void,
 }
 
-export default function Aside({notes, setActiveNoteId,activeNoteId}:AsidePros){
+export default function Aside({notes, setActiveNoteId,activeNoteId,createNote}:AsidePros){
     return (
         <aside
             className={`bg-white border-r border-slate-200 w-64 flex-shrink-0 transform transition-transform duration-300 ease-in-out -translate-x-full md:translate-x-0 fixed md:static h-full z-10`}>
@@ -14,7 +16,7 @@ export default function Aside({notes, setActiveNoteId,activeNoteId}:AsidePros){
                 <h1 className="text-xl font-bold text-blue-600">
                     BlueNote
                     <br/>
-                    {notes.filter((note)=>note.id===activeNoteId)[0].title}</h1>
+                    {notes?.filter((note)=>note.id===activeNoteId)[0]?.title}</h1>
             </div>
             <div className="p-2 space-y-1 overflow-y-auto h-[calc(100%-60px)]">
                 {notes.map(note => (
@@ -33,6 +35,11 @@ export default function Aside({notes, setActiveNoteId,activeNoteId}:AsidePros){
                         <div className="text-xs text-slate-500 mt-1">{note.updatedAt}</div>
                     </button>
                 ))}
+            </div>
+            <div className="p-2 space-y-1 overflow-y-auto h-[calc(100%-60px)]">
+                <button onClick={createNote}>
+                    新建笔记
+                </button>
             </div>
         </aside>
     )

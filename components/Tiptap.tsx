@@ -4,7 +4,6 @@ import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Emoji, { gitHubEmojis } from '@tiptap/extension-emoji';
 import Image from '@tiptap/extension-image';
-import Link from '@tiptap/extension-link'; // 虽然 StarterKit 包含，但常需自定义配置
 import { useCallback } from 'react';
 import "./tiptap.css"
 
@@ -22,6 +21,10 @@ const Tiptap = ({ value, onChange,saveNote }: Props) => {
                 heading: {
                     levels: [1, 2, 3, 4, 5, 6], // 支持全部标题级别
                 },
+                link:{
+                    openOnClick: true,
+                    autolink: true,
+                }
                 // 其他可选配置
             }),
             // Emoji 扩展
@@ -33,11 +36,6 @@ const Tiptap = ({ value, onChange,saveNote }: Props) => {
             Image.configure({
                 inline: false, // 图片作为块级元素（默认）
                 allowBase64: true, // 允许 base64 图片（用于本地预览）
-            }),
-            // 如果你需要自定义 link 行为（比如自动识别 URL），可以显式配置
-            Link.configure({
-                openOnClick: false, // 点击不自动跳转
-                autolink: true,     // 自动将输入的 URL 转为链接
             }),
         ],
         content: value,
