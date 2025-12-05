@@ -55,3 +55,12 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
     }
 }
+
+// export async function DELETE(request: NextRequest) {
+//     try {
+//     //     退出登录待完成
+//     } catch (error) {
+//         console.error('Login error:', error);
+//         return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
+//     }
+// }

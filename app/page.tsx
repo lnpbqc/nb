@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import {useEffect, useState} from 'react';
 import { useRouter } from "next/navigation";
 import Aside from "@/components/Aside";
 import {Note, now} from "@/lib/definitions";
@@ -26,14 +26,12 @@ export default function HomePage() {
     const activeNote = notes.find(n => n.id === activeNoteId) || null;
 
     // 假设用户名（未来可从 auth 获取）
-    const userName = "未登录";
+    const [userName,setUserName] = useState<string>("未登录");
+    // 假设登录注册状态（未来可从 auth 获取）
+    const [status,setStatus] = useState<boolean>(false);
 
     const sortNotes = (notes: Note[]) => {
         notes.sort((a:Note,b:Note)=>-new Date(a.updatedAt).getTime()+new Date(b.updatedAt).getTime())
-    }
-
-    const localGetNotes = async () => {
-
     }
 
 
@@ -51,6 +49,22 @@ export default function HomePage() {
                 setNotes(data);
                 setActiveNoteId(data[0].id);
             }
+        })();
+    }, []);
+
+    useEffect(() => {
+        (async () => {
+            const name = await (await fetch("/api/auth",{
+                method: "POST",
+                body: JSON.stringify({msg:"name"}),
+            })).json();
+            if(name.msg)setUserName(name.msg);
+
+            const status = await (await fetch("/api/auth",{
+                method: "POST",
+                body: JSON.stringify({msg:"status"}),
+            })).json();
+            if(status.msg)setStatus(status.msg);
         })();
     }, []);
 
@@ -145,9 +159,14 @@ export default function HomePage() {
 
                         <button
                             className="px-3 py-1.5 text-sm bg-blue-700 hover:bg-blue-600 text-white rounded-md"
-                            onClick={() => router.push('/auth/signin')}
+                            onClick={() => {
+                                if(!status) router.push('/auth/signin')
+                                else {
+                                    router.push('/auth/signout')
+                                }
+                            }}
                         >
-                            登录/注册
+                            {status?"退出":"登录 / 注册"}
                         </button>
                     </div>
                 </header>

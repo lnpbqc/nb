@@ -4,8 +4,19 @@ import { EditorContent, useEditor } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Emoji, { gitHubEmojis } from '@tiptap/extension-emoji';
 import Image from '@tiptap/extension-image';
-import { useCallback } from 'react';
 import "./tiptap.css"
+
+import {
+    Bold, Italic, Underline, Strikethrough, Code,
+    List, ListOrdered,
+    Quote, Code2, Minus,
+    Link, Unlink,
+    Image as ImageIcon,
+    Undo, Redo,
+    Smile
+} from "lucide-react";
+import {Level} from "@tiptap/extension-heading";
+
 
 interface Props {
     value: string
@@ -48,169 +59,128 @@ const Tiptap = ({ value, onChange,saveNote }: Props) => {
         }
     });
 
-    const addImage = useCallback(() => {
-        const url = window.prompt('请输入图片 URL');
-        if (url) {
-            editor?.chain().focus().setImage({ src: url }).run();
-        }
-    }, [editor]);
-
-    const addLink = useCallback(() => {
-        const url = window.prompt('请输入链接 URL');
-        if (url) {
-            editor?.chain().focus().setLink({ href: url }).run();
-        }
-    }, [editor]);
-
     return (
         <div className="border border-slate-200 rounded-lg p-2 bg-white h-full flex flex-col">
             {/* 工具栏 */}
-            <div className="flex flex-wrap gap-2 mb-4 p-2 bg-slate-100 rounded">
-                <button
-                    onClick={() => editor?.chain().focus().toggleBold().run()}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('bold') ? 'bg-blue-500 text-white' : 'bg-white'}`}
+            <div className="tiptap-toolbar">
+
+                {/* 标题下拉菜单 */}
+                <select
+                    onChange={(e) =>
+                        editor?.chain().focus().toggleHeading({ level: Number(e.target.value) as Level }).run()
+                    }
+                    className="tiptap-select"
+                    defaultValue=""
                 >
-                    加粗
-                </button>
-                <button
-                    onClick={() => editor?.chain().focus().toggleItalic().run()}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('italic') ? 'bg-blue-500 text-white' : 'bg-white'}`}
-                >
-                    斜体
-                </button>
-                <button
-                    onClick={() => editor?.chain().focus().toggleUnderline().run()}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('underline') ? 'bg-blue-500 text-white' : 'bg-white'}`}
-                >
-                    下划线
-                </button>
-                <button
-                    onClick={() => editor?.chain().focus().toggleStrike().run()}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('strike') ? 'bg-blue-500 text-white' : 'bg-white'}`}
-                >
-                    删除线
-                </button>
-                <button
-                    onClick={() => editor?.chain().focus().toggleCode().run()}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('code') ? 'bg-blue-500 text-white' : 'bg-white'}`}
-                >
-                    代码
+                    <option value="" disabled>标题</option>
+                    <option value="1">H1</option>
+                    <option value="2">H2</option>
+                    <option value="3">H3</option>
+                    <option value="4">H4</option>
+                    <option value="5">H5</option>
+                    <option value="6">H6</option>
+                </select>
+
+                <button className={`tiptap-btn ${editor?.isActive("bold") ? "active" : ""}`}
+                        onClick={() => editor?.chain().focus().toggleBold().run()}>
+                    <Bold size={16}/>
                 </button>
 
-                <button
-                    onClick={() => editor?.chain().focus().toggleHeading({ level: 1 }).run()}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('heading', { level: 1 }) ? 'bg-blue-500 text-white' : 'bg-white'}`}
-                >
-                    标题一
-                </button>
-                <button
-                    onClick={() => editor?.chain().focus().toggleHeading({ level: 2 }).run()}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('heading', { level: 2 }) ? 'bg-blue-500 text-white' : 'bg-white'}`}
-                >
-                    标题二
+                <button className={`tiptap-btn ${editor?.isActive("italic") ? "active" : ""}`}
+                        onClick={() => editor?.chain().focus().toggleItalic().run()}>
+                    <Italic size={16}/>
                 </button>
 
-                <button
-                    onClick={() => editor?.chain().focus().toggleBulletList().run()}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('bulletList') ? 'bg-blue-500 text-white' : 'bg-white'}`}
-                >
-                    无序列表
-                </button>
-                <button
-                    onClick={() => editor?.chain().focus().toggleOrderedList().run()}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('orderedList') ? 'bg-blue-500 text-white' : 'bg-white'}`}
-                >
-                    有序列表
+                <button className={`tiptap-btn ${editor?.isActive("underline") ? "active" : ""}`}
+                        onClick={() => editor?.chain().focus().toggleUnderline().run()}>
+                    <Underline size={16}/>
                 </button>
 
-                <button
-                    onClick={() => editor?.chain().focus().toggleBlockquote().run()}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('blockquote') ? 'bg-blue-500 text-white' : 'bg-white'}`}
+                <button className={`tiptap-btn ${editor?.isActive("strike") ? "active" : ""}`}
+                        onClick={() => editor?.chain().focus().toggleStrike().run()}>
+                    <Strikethrough size={16}/>
+                </button>
+
+                <button className={`tiptap-btn ${editor?.isActive("code") ? "active" : ""}`}
+                        onClick={() => editor?.chain().focus().toggleCode().run()}>
+                    <Code size={16}/>
+                </button>
+
+                <div className="tiptap-divider"></div>
+
+                <button className={`tiptap-btn ${editor?.isActive("bulletList") ? "active" : ""}`}
+                        onClick={() => editor?.chain().focus().toggleBulletList().run()}>
+                    <List size={16}/>
+                </button>
+
+                <button className={`tiptap-btn ${editor?.isActive("orderedList") ? "active" : ""}`}
+                        onClick={() => editor?.chain().focus().toggleOrderedList().run()}>
+                    <ListOrdered size={16}/>
+                </button>
+
+                <button className={`tiptap-btn ${editor?.isActive("blockquote") ? "active" : ""}`}
+                        onClick={() => editor?.chain().focus().toggleBlockquote().run()}>
+                    <Quote size={16}/>
+                </button>
+
+                <button className={`tiptap-btn ${editor?.isActive("codeBlock") ? "active" : ""}`}
+                        onClick={() => editor?.chain().focus().toggleCodeBlock().run()}>
+                    <Code2 size={16}/>
+                </button>
+
+                <button className="tiptap-btn"
+                        onClick={() => editor?.chain().focus().setHorizontalRule().run()}>
+                    <Minus size={16}/>
+                </button>
+
+                <div className="tiptap-divider"></div>
+
+                <button className={`tiptap-btn ${editor?.isActive("link") ? "active" : ""}`}
+                        onClick={() => {
+                            const url = prompt("请输入链接 URL");
+                            if (url) editor?.chain().focus().setLink({ href: url }).run();
+                        }}
                 >
-                    引言块
+                    <Link size={16}/>
                 </button>
 
-                <button
-                    onClick={() => editor?.chain().focus().toggleCodeBlock().run()}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('codeBlock') ? 'bg-blue-500 text-white' : 'bg-white'}`}
-                >
-                    代码块
+                <button className="tiptap-btn"
+                        disabled={!editor?.isActive("link")}
+                        onClick={() => editor?.chain().focus().unsetLink().run()}>
+                    <Unlink size={16}/>
                 </button>
 
-                <button
-                    onClick={() => editor?.chain().focus().setHorizontalRule().run()}
-                    className="px-3 py-1 text-sm bg-white rounded"
-                >
-                    HR
-                </button>
-
-                <button
-                    onClick={addLink}
-                    className={`px-3 py-1 text-sm rounded ${editor?.isActive('link') ? 'bg-blue-500 text-white' : 'bg-white'}`}
-                >
-                    链接
-                </button>
-
-                <button
-                    onClick={() => editor?.chain().focus().unsetLink().run()}
-                    disabled={!editor?.isActive('link')}
-                    className="px-3 py-1 text-sm bg-gray-200 rounded disabled:opacity-50"
-                >
-                    撤销链接
-                </button>
-
-                <button onClick={addImage} className="px-3 py-1 text-sm bg-white rounded">
-                    添加图片
-                </button>
-
-                <button
-                    onClick={() => editor?.chain().focus().setEmoji('smile').run()}
-                    className="px-3 py-1 text-sm bg-white rounded"
-                >
-                    😊
-                </button>
-
-                <button
-                    onClick={() => editor?.chain().focus().undo().run()}
-                    className="px-3 py-1 text-sm bg-white rounded"
-                >
-                    撤销
-                </button>
-                <button
-                    onClick={() => editor?.chain().focus().redo().run()}
-                    className="px-3 py-1 text-sm bg-white rounded"
-                >
-                    重做
-                </button>
-                <input
-                    type="file"
-                    accept="image/*"
-                    onChange={async (e) => {
-                        const file = e.target.files?.[0];
-                        if (!file) return;
-
-                        const reader = new FileReader();
-
-                        reader.onload = () => {
-                            editor?.chain().focus().setImage({ src: reader.result as string }).run();
-                        };
-                        reader.readAsDataURL(file);
-                    }}
-                    className="hidden"
-                    id="uploadImg"
+                <label htmlFor="uploadImg" className="tiptap-btn">
+                    <ImageIcon size={16}/>
+                </label>
+                <input id="uploadImg" type="file" accept="image/*"
+                       className="hidden"
+                       onChange={async (e) => {
+                           const file = e.target.files?.[0];
+                           if (!file) return;
+                           const reader = new FileReader();
+                           reader.onload = () =>
+                               editor?.chain().focus().setImage({ src: reader.result as string }).run();
+                           reader.readAsDataURL(file);
+                       }}
                 />
 
-                <label
-                    htmlFor="uploadImg"
-                    className="px-3 py-1 text-sm bg-white rounded"
-                >
-                    上传图片
-                </label>
+                <button className="tiptap-btn"
+                        onClick={() => editor?.chain().focus().setEmoji("smile").run()}>
+                    <Smile size={16}/>
+                </button>
 
-                <button
-                    onClick={saveNote}
-                    className="px-3 py-1 text-sm bg-green-400 rounded"
-                >
+                <div className="tiptap-divider"></div>
+
+                <button className="tiptap-btn" onClick={() => editor?.chain().focus().undo().run()}>
+                    <Undo size={16}/>
+                </button>
+
+                <button className="tiptap-btn" onClick={() => editor?.chain().focus().redo().run()}>
+                    <Redo size={16}/>
+                </button>
+
+                <button className="tiptap-btn save-btn" onClick={saveNote}>
                     保存
                 </button>
             </div>
@@ -231,12 +201,3 @@ export default Tiptap;
 // if (savedContent) {
 //     editor.setContent(JSON.parse(savedContent))
 // }
-
-// 数据库
-// fetch('/api/editor/content', {
-//     method: 'POST',
-//     headers: {
-//         'Content-Type': 'application/json',
-//     },
-//     body: JSON.stringify(editor.getJSON()),
-// })
