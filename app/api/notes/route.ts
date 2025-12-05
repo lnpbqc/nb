@@ -56,6 +56,7 @@ export async function POST(request: NextRequest) {
             await db
                 .update(notebookTable)
                 .set({
+                    title: payload.title,
                     content: payload.content,
                     updatedAt: today,
                 })

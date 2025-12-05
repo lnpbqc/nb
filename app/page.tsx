@@ -87,7 +87,8 @@ export default function HomePage() {
                                 : n
                         );
                         setNotes(updatedNotes);
-                        if(activeNote)saveNote(activeNote)
+
+                        save(updatedNotes.filter(n => n.id === activeNoteId)[0])
                     }}>
 
                     </TitleEditor>
