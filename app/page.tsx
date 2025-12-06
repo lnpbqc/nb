@@ -3,7 +3,7 @@
 import {useEffect, useState} from 'react';
 import { useRouter } from "next/navigation";
 import Aside from "@/components/Aside";
-import {Note, now} from "@/lib/definitions";
+import {Local_Notes_Key, Note, now} from "@/lib/definitions";
 import Tiptap from "@/components/Tiptap";
 import {deleteNote, getNotes, saveNote} from "@/lib/notes";
 import TitleEditor from "@/components/TitleEditor";
@@ -41,7 +41,6 @@ export default function HomePage() {
             const data = await getNotes();
             if (!data || data.length === 0) {
                 const first = createNewNote();
-                // await saveNote(first);
                 setNotes([first]);
                 setActiveNoteId(first.id);
             } else {
@@ -129,7 +128,7 @@ export default function HomePage() {
                                 ? {
                                     ...n,
                                     title: newTitle,
-                                    updatedAt: new Date().toLocaleDateString("zh-CN").replace(/\//g, "-"),
+                                    updatedAt: now(),
                                 }
                                 : n
                         );
@@ -162,6 +161,7 @@ export default function HomePage() {
                             onClick={() => {
                                 if(!status) router.push('/auth/signin')
                                 else {
+                                    localStorage.removeItem(Local_Notes_Key);
                                     router.push('/auth/signout')
                                 }
                             }}

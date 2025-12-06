@@ -3,10 +3,8 @@ import db from "@/lib/db";
 import {usersTable} from "@/app/db/schema";
 import {eq} from "drizzle-orm";
 import bcrypt from "bcryptjs";
-import {today} from "@/lib/definitions";
+import {ID_COOKIE, today, TOKEN_COOKIE} from "@/lib/definitions";
 
-const ID_COOKIE = 'session_user_id';
-const TOKEN_COOKIE = 'session_user_token';
 
 export default async function authenticate() {
     const cookieStore = await cookies();

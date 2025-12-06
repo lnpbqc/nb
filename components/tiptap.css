@@ -108,22 +108,23 @@
 /*    margin: 1.2rem 0;*/
 /*}*/
 
-/*!* ======================*/
-/*   图片（更清晰的间距）*/
-/*   ====================== *!*/
-/*.ProseMirror img {*/
-/*    max-width: 100%;*/
-/*    border-radius: 6px;*/
-/*    margin: 0.8rem 0;*/
-/*    display: block;*/
-/*}*/
+/* ======================
+   图片（更清晰的间距）
+   ====================== */
+.ProseMirror img {
+    max-width: 100%;
+    border-radius: 6px;
+    margin: 0.8rem 0;
+    display: block;
+    box-shadow: 0 0 4px rgba(0, 0, 0, 0.2);
+}
 
-/*!* ======================*/
-/*   Emoji*/
-/*   ====================== *!*/
-/*span[data-type="emoji"] {*/
-/*    font-size: 1.15em;*/
-/*}*/
+/* ======================
+   Emoji
+   ====================== */
+span[data-type="emoji"] {
+    font-size: 1.2rem;
+}
 
 
 /*============================================================================================*/
@@ -193,5 +194,32 @@
     width: 1px;
     background: #e5e7eb;
     margin: 0 4px;
+}
+
+
+.bubble-menu {
+    background-color: white;
+    border: 1px solid gray;
+    border-radius: 2px;
+    box-shadow: 1px 1px 1px gray;
+    display: flex;
+    padding: 0.2rem;
+
+    button {
+        background-color: unset;
+        margin: 0 2px;
+
+        &:hover {
+            background-color: #eee;
+        }
+
+        &.is-active {
+            background-color: lightgray;
+
+            &:hover {
+                background-color: #b4d880;
+            }
+        }
+    }
 }
 

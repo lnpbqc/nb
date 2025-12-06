@@ -20,8 +20,8 @@ export async function POST(req:NextRequest) {
     } catch (error) {
         console.error("获取信息失败", error);
         return NextResponse.json(
-            { error: "服务器错误", success: false },
-            { status: 500 }
+            { error: "未登录", success: false },
+            { status: 401 }
         );
     }
 }

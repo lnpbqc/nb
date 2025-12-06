@@ -5,10 +5,8 @@ import { usersTable } from '@/app/db/schema';
 import { eq } from 'drizzle-orm';
 import * as bcrypt from 'bcryptjs';
 import { cookies } from 'next/headers';
-import {today} from "@/lib/definitions"
+import {ID_COOKIE, today, TOKEN_COOKIE} from "@/lib/definitions"
 
-const ID_COOKIE = 'session_user_id';
-const TOKEN_COOKIE = 'session_user_token';
 const SESSION_DURATION = 60 * 60 * 24 * 7; // 7 天
 
 export async function POST(request: NextRequest) {
@@ -55,12 +53,3 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
     }
 }
-
-// export async function DELETE(request: NextRequest) {
-//     try {
-//     //     退出登录待完成
-//     } catch (error) {
-//         console.error('Login error:', error);
-//         return NextResponse.json({ error: '服务器内部错误' }, { status: 500 });
-//     }
-// }

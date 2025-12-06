@@ -1,9 +1,10 @@
 'use client';
 
-import { EditorContent, useEditor } from '@tiptap/react';
+import {EditorContent, useEditor, useEditorState} from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Emoji, { gitHubEmojis } from '@tiptap/extension-emoji';
 import Image from '@tiptap/extension-image';
+import ImageResize from 'tiptap-extension-resize-image'
 import "./tiptap.css"
 
 import {
@@ -17,6 +18,8 @@ import {
 } from "lucide-react";
 import {Level} from "@tiptap/extension-heading";
 import {Dropcursor} from "@tiptap/extensions";
+import {useEffect, useState} from "react";
+import {BubbleMenu} from "@tiptap/react/menus";
 
 
 interface Props {
@@ -48,11 +51,11 @@ const Tiptap = ({ value, onChange,saveNote }: Props) => {
             Image.configure({
                 inline: true, // 图片作为块级元素（默认）
                 allowBase64: true, // 允许 base64 图片（用于本地预览）
-                resize: {
-                    enabled: true,
-                    alwaysPreserveAspectRatio: true,
-                },
-            }),
+                // resize: {
+                //     enabled: true,
+                //     alwaysPreserveAspectRatio: true,
+                // },
+            }).extend(ImageResize),
             Dropcursor,
         ],
         content: value,
@@ -65,10 +68,37 @@ const Tiptap = ({ value, onChange,saveNote }: Props) => {
         }
     });
 
+    const [isEditable, setIsEditable] = useState(true)
+
+    useEffect(() => {
+        if (editor) {
+            editor.setEditable(isEditable)
+        }
+    }, [isEditable, editor])
+
+
+    const { isBold, isItalic, isStrikethrough } = useEditorState({
+        editor,
+        selector: (ctx) => ({
+            isBold: ctx?.editor?.isActive('bold') ?? false,
+            isItalic: ctx?.editor?.isActive('italic') ?? false,
+            isStrikethrough: ctx?.editor?.isActive('strike') ?? false,
+        }),
+    }) as {
+        isBold: boolean;
+        isItalic: boolean;
+        isStrikethrough: boolean;
+    };
+
     return (
         <div className="border border-slate-200 rounded-lg p-2 bg-white h-full flex flex-col">
             {/* 工具栏 */}
-            <div className="tiptap-toolbar">
+            <div className="tiptap-toolbar flex justify-center items-center flex-wrap">
+
+                <label>
+                    <input type="checkbox" checked={isEditable} onChange={() => setIsEditable(!isEditable)} />
+                    启用编辑
+                </label>
 
                 {/* 标题下拉菜单 */}
                 <select
@@ -191,6 +221,34 @@ const Tiptap = ({ value, onChange,saveNote }: Props) => {
                 </button>
             </div>
 
+            {isEditable&&editor&&(
+                <BubbleMenu editor={editor} options={{ placement: 'bottom', offset: 8, flip: true }}>
+                    <div className="bubble-menu">
+                        <button
+                            onClick={() => editor?.chain().focus().toggleBold().run()}
+                            className={isBold ? 'is-active' : ''}
+                            type="button"
+                        >
+                            Bold
+                        </button>
+                        <button
+                            onClick={() => editor?.chain().focus().toggleItalic().run()}
+                            className={isItalic ? 'is-active' : ''}
+                            type="button"
+                        >
+                            Italic
+                        </button>
+                        <button
+                            onClick={() => editor?.chain().focus().toggleStrike().run()}
+                            className={isStrikethrough ? 'is-active' : ''}
+                            type="button"
+                        >
+                            Strike
+                        </button>
+                    </div>
+                </BubbleMenu>
+            )}
+
             {/* 编辑器内容区 */}
             <EditorContent editor={editor} className="prose max-w-none flex-1 h-full overflow-y-auto tiptap-editor" />
         </div>
@@ -198,12 +256,3 @@ const Tiptap = ({ value, onChange,saveNote }: Props) => {
 };
 
 export default Tiptap;
-// 本地化
-// // Save the editor content to LocalStorage
-// localStorage.setItem('editorContent', JSON.stringify(editor.getJSON()))
-//
-// // Restore the editor content from LocalStorage
-// const savedContent = localStorage.getItem('editorContent')
-// if (savedContent) {
-//     editor.setContent(JSON.parse(savedContent))
-// }

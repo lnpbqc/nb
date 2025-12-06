@@ -29,3 +29,8 @@ export const now = ()=>{
     }
     return toLocalSqlTimestampMs(new Date());
 }
+
+export const Local_Notes_Key = "note_books";
+
+export const ID_COOKIE = "session_user_id";
+export const TOKEN_COOKIE = "session_user_token";

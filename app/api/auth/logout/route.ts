@@ -1,8 +1,7 @@
 // app/api/logout/route.ts
 import { NextResponse } from "next/server";
+import {ID_COOKIE, TOKEN_COOKIE} from "@/lib/definitions";
 
-const ID_COOKIE = "session_user_id";
-const TOKEN_COOKIE = "session_user_token";
 
 export async function POST() {
     const res = NextResponse.json({ success: true });
@@ -20,7 +19,7 @@ export async function POST() {
         value: "",
         path: "/",
         expires: new Date(0),
-    });
+    })
 
     return res;
 }

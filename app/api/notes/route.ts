@@ -2,8 +2,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import db from "@/lib/db";
 import {notebookTable} from "@/app/db/schema";
-import {and, eq} from "drizzle-orm";
-import {now, today} from "@/lib/definitions"
+import {eq} from "drizzle-orm";
+import {now} from "@/lib/definitions"
 import authenticate from "@/app/api/auth/auth-user";
 
 export async function POST(request: NextRequest) {
