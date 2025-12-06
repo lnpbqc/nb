@@ -108,7 +108,6 @@ export default function HomePage() {
                     const data = await getNotes();
                     if (!data || data.length === 0) {
                         const first = createNewNote();
-                        await saveNote(first);
                         setNotes([first]);
                         setActiveNoteId(first.id);
                     } else {
