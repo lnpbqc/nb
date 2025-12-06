@@ -17,11 +17,13 @@
     outline: none;
     padding: 0;
     margin: 0;
+    width: 100%;
+    height: 100%;
 }
 
 /* 常规段落 */
 .ProseMirror p {
-    margin: 0.45em 0;
+    margin: 0;
 }
 
 /* ======================
@@ -32,10 +34,10 @@
 .ProseMirror h3,
 .ProseMirror h4,
 .ProseMirror h5,
-.ProseMirror h6 {
+.ProseMirror h6{
     font-weight: 600;
     line-height: 1.3;
-    margin-top: 1.2em;
+    margin-top: 1.2rem;
     margin-bottom: 0.4em;
     color: #111827;
 }
@@ -83,65 +85,45 @@
     font-style: italic;
 }
 
-/* ======================
-   行内代码（更清晰）
-   ====================== */
-.ProseMirror code {
-    background: #efefef;
-    padding: 2px 4px;
-    border-radius: 4px;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.85rem;
+.ProseMirror blockquote::before,.ProseMirror blockquote::after {
+    content: "";
 }
 
-/* ======================
-   代码块（更紧凑）
-   ====================== */
-.ProseMirror pre {
-    background: #1e1e1e;
-    color: darkblue;
-    padding: 0.8rem;
-    border-radius: 6px;
-    overflow-x: auto;
-    font-family: "JetBrains Mono", monospace;
-    font-size: 0.85rem;
-    margin: 0.9em 0;
-}
 
-/* ======================
-   链接（更明显）
-   ====================== */
-.ProseMirror a {
-    color: #1d4ed8;
-    text-decoration: underline;
-    font-weight: 500;
-}
+/*!* ======================*/
+/*   链接（更明显）*/
+/*   ====================== *!*/
+/*.ProseMirror a {*/
+/*    color: #1d4ed8;*/
+/*    text-decoration: underline;*/
+/*    font-weight: 500;*/
+/*}*/
 
-/* ======================
-   水平线
-   ====================== */
-.ProseMirror hr {
-    border: none;
-    border-top: 1px solid #d1d5db;
-    margin: 1.2rem 0;
-}
+/*!* ======================*/
+/*   水平线*/
+/*   ====================== *!*/
+/*.ProseMirror hr {*/
+/*    border: none;*/
+/*    border-top: 1px solid #d1d5db;*/
+/*    margin: 1.2rem 0;*/
+/*}*/
 
-/* ======================
-   图片（更清晰的间距）
-   ====================== */
-.ProseMirror img {
-    max-width: 100%;
-    border-radius: 6px;
-    margin: 0.8rem 0;
-    display: block;
-}
+/*!* ======================*/
+/*   图片（更清晰的间距）*/
+/*   ====================== *!*/
+/*.ProseMirror img {*/
+/*    max-width: 100%;*/
+/*    border-radius: 6px;*/
+/*    margin: 0.8rem 0;*/
+/*    display: block;*/
+/*}*/
 
-/* ======================
-   Emoji
-   ====================== */
-span[data-type="emoji"] {
-    font-size: 1.15em;
-}
+/*!* ======================*/
+/*   Emoji*/
+/*   ====================== *!*/
+/*span[data-type="emoji"] {*/
+/*    font-size: 1.15em;*/
+/*}*/
 
 
 /*============================================================================================*/

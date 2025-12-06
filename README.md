@@ -80,3 +80,6 @@ const Tiptap = () => {
 
 export default Tiptap
 ```
+
+https://tiptap.dev/docs/editor/extensions/functionality/bubble-menu
+https://tiptap.dev/docs/editor/core-concepts/persistence

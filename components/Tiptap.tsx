@@ -16,6 +16,7 @@ import {
     Smile
 } from "lucide-react";
 import {Level} from "@tiptap/extension-heading";
+import {Dropcursor} from "@tiptap/extensions";
 
 
 interface Props {
@@ -45,9 +46,14 @@ const Tiptap = ({ value, onChange,saveNote }: Props) => {
             }),
             // Image 扩展（必须显式添加）
             Image.configure({
-                inline: false, // 图片作为块级元素（默认）
+                inline: true, // 图片作为块级元素（默认）
                 allowBase64: true, // 允许 base64 图片（用于本地预览）
+                resize: {
+                    enabled: true,
+                    alwaysPreserveAspectRatio: true,
+                },
             }),
+            Dropcursor,
         ],
         content: value,
         autofocus: true,
